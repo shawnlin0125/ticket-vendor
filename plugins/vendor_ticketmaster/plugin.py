@@ -142,3 +142,4 @@ class TicketmasterPlugin(Plugin):
             async with session.get(f"{self._api_base}/ping", timeout=aiohttp.ClientTimeout(total=5)) as resp:
                 if resp.status != 200:
                     raise RuntimeError(f"API returned {resp.status}")
+# trigger CI
