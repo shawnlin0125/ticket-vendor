@@ -27,10 +27,6 @@ jobs:
       matrix:
         plugin:
           - ticketmaster
-          - kktix
-          - ibon
-          - fami
-          - tixcraft
 
     steps:
       - uses: actions/checkout@v4

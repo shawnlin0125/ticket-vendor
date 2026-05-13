@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ticket-vendor"
 version = "0.1.0"
-description = "Ticket vendor plugins for plugin-hub — TicketMaster, KKTIX, ibon, fami, tixcraft"
+description = "Ticket vendor plugin for plugin-hub — TicketMaster (reference implementation)"
 requires-python = ">=3.12"
 license = {text = "MIT"}
 authors = [{name = "Shawn Lin"}]
@@ -22,10 +22,6 @@ dev = ["pytest>=8", "pytest-asyncio>=0.25"]
 # Each plugin declares itself here. Hub auto-discovers via importlib.metadata.
 [project.entry-points."plugin_hub.plugins"]
 ticketmaster = "vendor_ticketmaster.plugin:TicketmasterPlugin"
-kktix = "vendor_kktix.plugin:KKTIXPlugin"
-ibon = "vendor_ibon.plugin:IbonPlugin"
-fami = "vendor_fami.plugin:FamiPlugin"
-tixcraft = "vendor_tixcraft.plugin:TixcraftPlugin"
 
 [tool.setuptools.packages.find]
 where = ["plugins"]
