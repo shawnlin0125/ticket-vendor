@@ -8,3 +8,4 @@ from vendor_ticketmaster.plugin import TicketmasterPlugin
 def plugin():
     """Return a TicketmasterPlugin instance for testing."""
     return TicketmasterPlugin()
+# CI trigger
