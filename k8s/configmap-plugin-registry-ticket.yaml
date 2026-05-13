@@ -1,0 +1,24 @@
+# Plugin registry for ticket-vendor
+# Plugins discovered by plugin-hub via setuptools entry_points.
+# This ConfigMap is supplementary metadata.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: plugin-registry-ticket
+data:
+  plugins.yaml: |
+    ticketmaster:
+      target: vendor-heavy-1
+      db_schema: plugin_ticketmaster
+    kktix:
+      target: vendor-heavy-2
+      db_schema: plugin_kktix
+    ibon:
+      target: vendor-bundle
+      db_schema: plugin_ibon
+    fami:
+      target: vendor-bundle
+      db_schema: plugin_fami
+    tixcraft:
+      target: vendor-bundle
+      db_schema: plugin_tixcraft
