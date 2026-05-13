@@ -25,3 +25,6 @@ ticketmaster = "vendor_ticketmaster.plugin:TicketmasterPlugin"
 
 [tool.setuptools.packages.find]
 where = ["plugins"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
