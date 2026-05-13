@@ -39,10 +39,11 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
+          pip install git+https://github.com/shawnlin0125/plugin-hub.git#subdirectory=platform-plugin-sdk
           pip install -e ".[dev]"
 
       - name: Run ${{ matrix.plugin }} tests
-        working-directory: plugins/${{ matrix.plugin }}
+        working-directory: plugins/vendor_ticketmaster
         run: |
           python -m pytest tests/ -v --tb=short
 
