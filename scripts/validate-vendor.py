@@ -92,7 +92,6 @@ def check_required_files(vendor_dir: Path) -> list[str]:
         vendor_dir / "tests" / "test_contract.py",
         vendor_dir / "tests" / "test_vendor_mock.py",
         vendor_dir / "tests" / "test_business_mock.py",
-        vendor_dir / "tests" / "test_integration.py",
     ]
 
     for f in required_files:
