@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "pytest-asyncio>=0.25"]
+dev = ["pytest>=8", "pytest-asyncio>=0.25", "fastapi>=0.115", "uvicorn>=0.34"]
 
 # ── Plugin registration ──
 # Each plugin declares itself here. Hub auto-discovers via importlib.metadata.
