@@ -1,4 +1,8 @@
-"""Transform tests — verify external API format → internal format conversion."""
+"""Vendor mock tests — verify the proxy correctly handles external vendor API.
+
+These tests start the vendor mock server (simulates TicketMaster API)
+and verify the proxy's interactions with the downstream vendor.
+"""
 
 import json
 from pathlib import Path

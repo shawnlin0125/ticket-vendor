@@ -64,12 +64,35 @@ class TicketmasterPlugin(Plugin):
 
     # ── Testing Support ───────────────────────────────────────
 
+    @property
+    def db_schema(self) -> str:
+        return "plugin_ticketmaster"
+
+    @property
+    def redis_prefix(self) -> str:
+        return "plugin:ticketmaster:"
+
+    @property
+    def kafka_topic_prefix(self) -> str:
+        return "plugin.ticketmaster."
+
     def get_mock_server(self):
-        """Return a mock TicketMaster API server."""
-        from vendor_ticketmaster.mock.server import TicketmasterMockServer
+        """Return a mock TicketMaster API server (downstream: external vendor)."""
+        from vendor_ticketmaster.mock.vendor.server import TicketmasterMockServer
 
         fixtures_dir = _HERE / "fixtures"
         return TicketmasterMockServer(fixtures_dir)
+
+    def get_business_mock_server(self):
+        """Return a mock business system client (upstream: calls unified API).
+
+        This simulates the 業務系統 making requests to the proxy's
+        unified API endpoints (search, orders, inventory).
+        """
+        from vendor_ticketmaster.mock.business.server import BusinessMockClient
+
+        # In tests, the proxy URL is determined by the test harness
+        return BusinessMockClient
 
     def get_fixtures(self) -> list[Fixture]:
         """List all test fixtures."""
