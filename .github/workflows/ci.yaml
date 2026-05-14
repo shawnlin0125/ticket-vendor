@@ -117,6 +117,21 @@ jobs:
             echo "❌ **${{ matrix.plugin }}**: Tests failed — check logs above" >> $GITHUB_STEP_SUMMARY
           fi
 
+      - name: Generate plugin manifest
+        if: success()
+        run: |
+          python scripts/generate-manifest.py > plugin-manifest.json
+          echo "📋 Manifest generated:"
+          cat plugin-manifest.json
+
+      - name: Commit manifest
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "CI Bot"
+          git config user.email "ci@plugin-hub.local"
+          git add plugin-manifest.json
+          git diff --staged --quiet || (git commit -m "ci: update plugin-manifest.json" && git push)
+
   # ── Aggregate summary ──
   summary:
     name: CI Summary

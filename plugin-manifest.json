@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/shawnlin0125/ticket-vendor/main/schemas/plugin-manifest.schema.json",
+  "plugins": [
+    {
+      "id": "ticketmaster",
+      "name": "TicketMaster",
+      "version": "0.1.0",
+      "description": "TicketMaster Plugin — ticket vendor integration.",
+      "repo": "https://github.com/shawnlin0125/ticket-vendor",
+      "test_passed": true,
+      "last_ci": "2026-05-14T02:43:43Z"
+    }
+  ]
+}
