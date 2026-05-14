@@ -90,9 +90,9 @@ class TicketmasterPlugin(Plugin, VendorProxy):
 4. Register entry point in `pyproject.toml`
 5. Submit PR → CI matrix tests → all pass
 6. CI auto-updates `plugin-manifest.json`
-7. Hub auto-discovers new vendor (dashboard shows ✨NEW)
-8. Assign to deployment (proxy-high or proxy-normal)
-9. Click Enable → live
+7. Hub auto-discovers new vendor (dashboard shows ✨NEW badge + CI status)
+8. Click **Enable** → vendor goes live on ALL proxy instances
+9. Update `proxy-plugins` ConfigMap (from Hub's `/api/load-plugins`) → restart proxy pods
 
 **See:** [`AI_DEVELOPMENT_GUIDE.md`](AI_DEVELOPMENT_GUIDE.md) + [`VENDOR_CHECKLIST.md`](VENDOR_CHECKLIST.md)
 
