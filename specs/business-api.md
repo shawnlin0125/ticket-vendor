@@ -1,16 +1,27 @@
 # 業務系統統一 API 規格
 
 > 本文件定義代理系統對上游業務系統暴露的**統一 API 合約**。
-> 所有 vendor plugin 必須實作這些端點，確保業務系統可以用同一套 API 操作不同供應商。
+> 所有 vendor plugin 必須實作這些端點。
+> URL 透過路徑第一段指定 vendor，業務系統明確選擇使用哪個票券供應商。
 
 ---
 
 ## 設計原則
 
-- **統一合約**：業務系統只呼叫一套 API，不感知下游是哪個供應商
-- **vendor 透明**：vendor 選擇透過 request header `X-Vendor` 或 config 決定，不暴露在 URL
+- **vendor 顯式路由**：vendor 在 URL 路徑中 (`/api/v1/{vendor}/...`)，語意清晰
+- **統一合約**：不同 vendor 的 API 格式相同，業務系統只需換 vendor name
 - **錯誤統一**：所有錯誤回應使用相同格式，不論下游供應商回傳什麼
 - **可 mock**：每個 vendor 的 `mock/business/` 必須模擬這些端點的呼叫行為
+
+```
+業務系統                                   代理系統
+┌──────────────────┐          GET /api/v1/ticketmaster/search?keyword=Coldplay
+│ 選擇供應商:        │ ──────────────────────────────────────────────────────▶
+│ ● TicketMaster    │
+│ ○ KKTIX           │          GET /api/v1/kktix/search?keyword=五月天
+│ ○ ibon            │ ──────────────────────────────────────────────────────▶
+└──────────────────┘
+```
 
 ---
 
@@ -20,8 +31,9 @@
 
 ```
 Authorization: Bearer <business-system-token>
-X-Vendor: ticketmaster          ← 指定下游供應商（可選，由 plugin config 決定）
 ```
+
+> 不再需要 `X-Vendor` header — vendor 已從 URL 路徑取得。
 
 ### 錯誤回應格式
 
@@ -56,8 +68,14 @@ X-Vendor: ticketmaster          ← 指定下游供應商（可選，由 plugin 
 ### 1. 查詢商品結構 / 活動
 
 ```
-GET /api/v1/search
+GET /api/v1/{vendor}/search
 ```
+
+**路徑參數:**
+
+| 參數 | 說明 | 範例 |
+|------|------|------|
+| `vendor` | 供應商 ID | `ticketmaster`, `kktix`, `ibon` |
 
 **Query Parameters:**
 
@@ -69,6 +87,11 @@ GET /api/v1/search
 | `date_to` | ISO 8601 | 否 | 活動結束日 |
 | `page` | integer | 否 | 頁碼（default: 1） |
 | `page_size` | integer | 否 | 每頁筆數（default: 20, max: 100） |
+
+**範例請求:**
+```
+GET /api/v1/ticketmaster/search?keyword=Coldplay&page=1&page_size=20
+```
 
 **Response:**
 
@@ -107,7 +130,12 @@ GET /api/v1/search
 ### 2. 建立訂單（下單）
 
 ```
-POST /api/v1/orders
+POST /api/v1/{vendor}/orders
+```
+
+**範例請求:**
+```
+POST /api/v1/ticketmaster/orders
 ```
 
 **Request Body:**
@@ -151,7 +179,12 @@ POST /api/v1/orders
 ### 3. 查詢訂單狀態（查單）
 
 ```
-GET /api/v1/orders/{order_id}
+GET /api/v1/{vendor}/orders/{order_id}
+```
+
+**範例請求:**
+```
+GET /api/v1/ticketmaster/orders/ord_20260514_001
 ```
 
 **Response:**
@@ -182,11 +215,16 @@ GET /api/v1/orders/{order_id}
 ### 4. 輪詢訂單狀態
 
 ```
-GET /api/v1/orders/{order_id}/poll
+GET /api/v1/{vendor}/orders/{order_id}/poll
 ```
 
 > 與 `GET /orders/{id}` 相同，但設計意圖是用於輪詢（short polling）。
 > 業務系統應使用此端點搭配定時輪詢，而非 webhook。
+
+**範例請求:**
+```
+GET /api/v1/ticketmaster/orders/ord_20260514_001/poll
+```
 
 **Response:** 同 `GET /orders/{id}`
 
@@ -195,7 +233,7 @@ GET /api/v1/orders/{order_id}/poll
 ### 5. 查詢庫存
 
 ```
-GET /api/v1/inventory
+GET /api/v1/{vendor}/inventory
 ```
 
 **Query Parameters:**
@@ -203,6 +241,11 @@ GET /api/v1/inventory
 | 參數 | 類型 | 必要 | 說明 |
 |------|------|------|------|
 | `event_id` | string | 是 | 活動 ID |
+
+**範例請求:**
+```
+GET /api/v1/ticketmaster/inventory?event_id=evt_001
+```
 
 **Response:**
 
@@ -248,11 +291,11 @@ GET /api/v1/inventory
 
 2. **在 `mock/business/server.py` 中模擬業務系統呼叫這些端點**
    ```python
-   # 模擬業務系統的 search 請求
-   async def simulate_search(keyword="Coldplay"):
-       async with aiohttp.ClientSession() as s:
-           async with s.get(f"{proxy_url}/api/v1/search?keyword={keyword}") as resp:
-               return await resp.json()
+   # BusinessMockClient 建構時傳入 vendor name，URL 自動帶入
+   client = BusinessMockClient(proxy_url="http://127.0.0.1:8080", vendor="ticketmaster")
+   
+   # 實際呼叫：GET /api/v1/ticketmaster/search?keyword=Coldplay
+   result = await client.search(keyword="Coldplay")
    ```
 
 3. **在 `mock/business/scenarios.py` 中定義業務情境**
@@ -262,12 +305,8 @@ GET /api/v1/inventory
            ("search", {"keyword": "Coldplay"}),
            ("create_order", {"event_id": "evt_001", ...}),
            ("get_order", {"order_id": "..."}),
-           ("poll", {"order_id": "..."}),
-       ],
-       "vendor_timeout": [
-           ("search", {"keyword": "Coldplay"}),
-           ("create_order", {"event_id": "evt_001", ...}),
-           # vendor 逾時 → proxy 回傳 retryable error
+           ("poll_order", {"order_id": "..."}),
+           ("check_inventory", {"event_id": "evt_001"}),
        ],
    }
    ```
@@ -286,3 +325,4 @@ GET /api/v1/inventory
 | `INSUFFICIENT_INVENTORY` | 409 | 庫存不足 |
 | `DUPLICATE_ORDER` | 409 | 重複訂單（idempotency key） |
 | `RATE_LIMITED` | 429 | 請求頻率限制 |
+| `VENDOR_NOT_FOUND` | 404 | URL 中的 vendor 不存在或未啟用 |
