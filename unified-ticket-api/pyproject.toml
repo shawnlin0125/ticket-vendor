@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unified-ticket-api"
+version = "0.1.0"
+description = "Unified Ticket Vendor API — consumer-driven contract defined by the business system (Grails)"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Business System Team"}]
+dependencies = []  # 純型別定義，零依賴
+
+[tool.setuptools.packages.find]
+where = ["."]

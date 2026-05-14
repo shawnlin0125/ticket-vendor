@@ -159,20 +159,31 @@ def check_plugin_contract(vendor_name: str, vendor_dir: Path) -> list[str]:
         else:
             errors.append(f"Missing isolation property: {prop_name}")
 
-    # Check business API handlers
-    business_handlers = [
-        "handle_search",
-        "handle_create_order",
-        "handle_get_order",
-        "handle_poll_order",
-        "handle_inventory",
+    # Check VendorProxy import (business SDK)
+    if "from unified_ticket_api import" in content or "from unified_ticket_api import VendorProxy" in content:
+        ok("VendorProxy import: unified_ticket_api")
+    else:
+        warn("VendorProxy not imported — plugin should inherit from unified_ticket_api.VendorProxy")
+
+    if "VendorProxy" in content:
+        ok("Inherits VendorProxy")
+    else:
+        errors.append("Missing VendorProxy inheritance — must implement business API contract")
+
+    # Check business API methods (VendorProxy ABC)
+    business_methods = [
+        "async def search",
+        "async def create_order",
+        "async def get_order",
+        "async def poll_order",
+        "async def check_inventory",
     ]
 
-    for handler in business_handlers:
-        if handler in content:
-            ok(f"Business handler: {handler}")
+    for method_name in business_methods:
+        if method_name in content:
+            ok(f"Business method: {method_name}")
         else:
-            warn(f"Business handler not yet implemented: {handler} — implement before production")
+            errors.append(f"Missing business method: {method_name} — VendorProxy ABC requires it")
 
     return errors
 
